@@ -21,6 +21,7 @@ import {ControllerDataset} from './controller_dataset';
 import * as ui from './ui';
 import {Webcam} from './webcam';
 
+
 // The number of classes we want to predict. In this example, we will be
 // predicting 4 classes for up, down, left, and right.
 const NUM_CLASSES = 4;
@@ -166,6 +167,119 @@ document.getElementById('predict').addEventListener('click', () => {
   isPredicting = true;
   predict();
 });
+
+// Declare the object that contains functions that use web audio to
+// make sound. We don't assign it yet because we have to do that in
+// response to a user interaction.
+var audio;
+var audio_kick = document.getElementById('audio_kick');
+var audio_snare = document.getElementById('audio_snare');
+var audio_hat = document.getElementById('audio_hihat');
+var STEP_COUNT = 8;
+var BUTTON_SIZE = 39;
+var button = document.getElementById('button');
+var color = "lightgray"
+
+var onClick = function() {
+
+    audio_kick.load(); 
+    audio_snare.load();
+    audio_hihat.load();
+
+    start_running();
+};
+
+button.addEventListener('click', onClick, false);
+
+var STEP = 0;
+// Support iOS:
+// https://gist.github.com/laziel/7aefabe99ee57b16081c
+
+
+// Create the data for the drum machine.
+var data = {
+    // `step` represents the current step (or beat) of the loop.
+    step: 0,
+
+};
+
+// Update
+
+// Runs every {TEMPO} milliseconds.
+var TEMPO = 200;
+var paused = false;
+
+function start_running() {
+    setInterval(function() {
+    var old_step = STEP;
+
+    STEP = (STEP + 1) % STEP_COUNT;
+
+    if (old_step != STEP && STEP==0) {
+        audio_kick.play();
+        color="lightgray";
+    }
+    else if (old_step != STEP && STEP==4) {
+        audio_kick.play();
+        audio_snare.play();
+        color="deeppink"
+    }
+    else if (old_step != STEP && (STEP==2 || STEP==6)) {
+        audio_hat.pause()
+        audio_hat.currentTime = 0
+        audio_hat.play();
+        color="lightgray";
+    }
+
+    }, TEMPO);
+
+    (function draw() {
+    screen.clearRect(0, 0, 40, screen.canvas.height);
+
+
+    // Draw the pink square that indicates the current step (beat).
+    
+    for(var x = 0; x < STEP_COUNT; x++) {
+        drawButton(screen,
+                x,
+                0,
+               "gray");
+    };
+
+    console.log(STEP);
+
+    drawButton(screen, STEP, 0, color);
+
+    requestAnimationFrame(draw);
+
+    })();
+
+}
+
+
+var screen = document.getElementById("screen").getContext("2d");
+
+
+function buttonPosition(column, row) {
+    return {
+        x: BUTTON_SIZE / 2 + column * BUTTON_SIZE * 1.5,
+        y: BUTTON_SIZE / 2 + row * BUTTON_SIZE * 1.5
+    };
+};
+// **drawButton()** draws a button in `color` at `column` and `row`.
+function drawButton(screen, column, row, color) {
+    var position = buttonPosition(column, row);
+    screen.fillStyle = color;
+    screen.fillRect(position.x, position.y, BUTTON_SIZE, BUTTON_SIZE);
+};
+
+function clear() {
+    data.tracks.forEach(function(track) {
+        track.steps = track.steps.map(function() {
+            return false
+        });
+    });
+}
 
 async function init() {
   await webcam.setup();

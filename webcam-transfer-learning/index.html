@@ -18,104 +18,66 @@ limitations under the License.
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <title>Webcam Pacman</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-teal.min.css" />
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
   <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
   <link rel="stylesheet" href="./styles.css">
+
 </head>
 <body>
   <header>
-    Turn your <b>Web Camera</b> into a controller using a <b>Neural Network</b>.
+    Turn your <b>Web Camera</b> into a theramin using <b>Neural Networks</b> that recognize sequences.
   </header>
   <div id="no-webcam">
       No webcam found. <br/>
       To use this demo, use a device with a webcam.
     </div>
-  <!-- Top -->
-  <div id="pacman-container">
-    <div id="logo">
-      <div id="logo-l">
-        <div id="logo-b">
-        </div>
-      </div>
+  <div class="panel training-panel">
+   <div class="panel-row big-buttons">
+      <button id="button" class="record-button" style="margin: 10px">
+        <span>Enable audio</span>
+      </button>
+          <div class="panel-cell panel-cell-left panel-cell-fill">
+          <p class="help-text" style="margin: 10px">
+          Click to begin playing a music sequence. <br/><br/>
+          Practice clapping along to the music,
+          making sure to clap on the solid pink, snare beat. <br/><br/>
+          When you're ready, hit 'collect samples' to build a training set  that we can train our neural network(s) on.<br/>
+          
+          </p>
+        </div><!-- ./panel-cell -->
     </div>
   </div>
 
   <div id="status">Loading mobilenet...</div>
 
   <div class="controller-panels" id="controller" style="display:none">
+    <audio id="audio_kick">
+    <source src="kick.mp3" type="audio/mp3" />
+    </audio>
+    <audio id="audio_snare">
+    <source src="snare.mp3" type="audio/mp3" />
+    </audio>
+    <audio id="audio_hihat">
+    <source src="hihat.mp3" type="audio/mp3" />
+    </audio>
+
 
     <div class="panel training-panel">
 
       <!-- Big buttons. -->
+      <canvas id="screen" width="500px" height="80px"></canvas>
       <div class="panel-row big-buttons">
         <button id="train">
-          <img width="66" height="66" src="./images/button.svg" />
           <span id="train-status">TRAIN MODEL</span>
         </button>
         <button id="predict">
-          <img width="66" height="66" src="./images/button.svg" />
           <span>PLAY</span>
         </button>
       </div><!-- /.panel-row -->
 
       <div class="panel-row params-webcam-row">
-
-        <!-- Hyper params. -->
-        <div class="hyper-params">
-
-          <!-- Learning rate -->
-          <div class="dropdown">
-            <label>Learning rate</label>
-            <div class="select">
-              <select id="learningRate">
-                <option value="0.00001">0.00001</option>
-                <option selected value="0.0001">0.0001</option>
-                <option value="0.01">0.001</option>
-                <option value="0.03">0.003</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Batch size -->
-          <div class="dropdown">
-            <label>Batch size</label>
-            <div class="select">
-              <select id="batchSizeFraction">
-                <option value="0.05">0.05</option>
-                <option value="0.1">0.1</option>
-                <option selected value="0.4">0.4</option>
-                <option value="1">1</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Epochs -->
-          <div class="dropdown">
-            <label>Epochs</label>
-            <div class="select">
-              <select id="epochs">
-                <option value="10">10</option>
-                <option selected value="20">20</option>
-                <option value="40">40</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Hidden units -->
-          <div class="dropdown">
-            <label>Hidden units</label>
-            <div class="select">
-              <select id="dense-units">
-                <option value="10">10</option>
-                <option selected value="100">100</option>
-                <option value="200">200</option>
-              </select>
-            </div>
-          </div>
-
-        </div><!-- /.hyper-params -->
 
         <div class="webcam-box-outer">
           <div class="webcam-box-inner">
@@ -127,104 +89,89 @@ limitations under the License.
 
     </div><!-- /.panel -->
 
-    <div class="panel joystick-panel">
+    <div class="panel">
 
       <div class="panel-row panel-row-top">
 
-        <div class="panel-cell panel-cell-left panel-cell-fill">
-          <p class="help-text">
-          Click to add the <br/>
-          current camera <br/>
-          view as an example <br/>
-          for that control
-          </p>
-        </div><!-- ./panel-cell -->
 
-        <div class="panel-cell panel-cell-center">
+        <div class="panel-cell">
           <div class="thumb-box">
-            <div class="thumb-box-outer">
               <div class="thumb-box-inner">
                 <canvas class="thumb" width=224 height=224 id="up-thumb"></canvas>
               </div>
-              <button class="record-button" id="up"/><span>Add Sample</span></button>
-            </div>
-            <p>
-              <span id="up-total">0</span> examples
-            </p>
           </div>
         </div><!-- ./panel-cell -->
 
         <div class="panel-cell panel-cell-right panel-cell-fill">
         </div><!-- ./panel-cell -->
-
-      </div><!-- /.panel-row -->
-      <div class="panel-row panel-row-middle">
-        <div class="panel-cell panel-cell-left">
-          <div class="thumb-box">
-            <div class="thumb-box-outer">
-              <div class="thumb-box-inner">
-                <canvas class="thumb" width=224 height=224 id="left-thumb"></canvas>
-              </div>
-              <button class="record-button" id="left"/><span>Add Sample</span></button>
-            </div>
-            <p>
-              <span id="left-total">0</span> examples
-            </p>
-          </div>
-        </div><!-- ./panel-cell -->
-
-        <div class="panel-cell panel-cell-center panel-cell-fill">
-          <img height="108" width="129" src="./images/joystick.png" />
-        </div><!-- ./panel-cell -->
-
-        <div class="panel-cell panel-cell-right">
-          <div class="thumb-box">
-            <div class="thumb-box-outer">
-              <div class="thumb-box-inner">
-                <canvas class="thumb" width=224 height=224 id="right-thumb"></canvas>
-              </div>
-              <button class="record-button" id="right"/><span>Add Sample</span></button>
-            </div>
-            <p>
-              <span id="right-total">0</span> examples
-            </p>
-          </div>
-        </div><!-- ./panel-cell -->
-
-      </div><!-- /.panel-row -->
-
-      <div class="panel-row panel-row-bottom">
-
-        <div class="panel-cell panel-cell-left panel-cell-fill">
-        </div><!-- ./panel-cell -->
-
-        <div class="panel-cell panel-cell-center">
-          <div class="thumb-box">
-            <div class="thumb-box-outer">
-              <div class="thumb-box-inner">
-                <canvas class="thumb" width=224 height=224 id="down-thumb"></canvas>
-              </div>
-              <button class="record-button" id="down"/><span>Add Sample</span></button>
-            </div>
-            <p>
-              <span id="down-total">0</span> examples
-            </p>
-          </div>
-        </div><!-- ./panel-cell -->
-
-        <div class="panel-cell panel-cell-right panel-cell-fill">
-        </div><!-- ./panel-cell -->
-
-      </div><!-- /.panel-row -->
 
 
     </div><!-- /.panel -->
 
   </div><!-- /#controller -->
 
-  <p id="copyright">PAC-MAN&trade; &copy; BANDAI NAMCO Entertainment Inc.</p>
+ <!-- Hyper params. -->
+    <div class="hyper-params" style="display:none">
 
-  <script src="https://storage.googleapis.com/tfjs-examples/assets/webcam-transfer-learning/pacman-google.js"></script>
+      <!-- Learning rate -->
+      <div class="dropdown">
+        <label>Learning rate</label>
+        <div class="select">
+          <select id="learningRate">
+            <option value="0.00001">0.00001</option>
+            <option selected value="0.0001">0.0001</option>
+            <option value="0.01">0.001</option>
+            <option value="0.03">0.003</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Batch size -->
+      <div class="dropdown">
+        <label>Batch size</label>
+        <div class="select">
+          <select id="batchSizeFraction">
+            <option value="0.05">0.05</option>
+            <option value="0.1">0.1</option>
+            <option selected value="0.4">0.4</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Epochs -->
+      <div class="dropdown">
+        <label>Epochs</label>
+        <div class="select">
+          <select id="epochs">
+            <option value="10">10</option>
+            <option selected value="20">20</option>
+            <option value="40">40</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Hidden units -->
+      <div class="dropdown">
+        <label>Hidden units</label>
+        <div class="select">
+          <select id="dense-units">
+            <option value="10">10</option>
+            <option selected value="100">100</option>
+            <option value="200">200</option>
+          </select>
+        </div>
+      </div>
+
+    </div><!-- /.hyper-params -->
+
   <script src="index.js"></script>
+  <script
+    src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+    crossorigin="anonymous"></script>
+    
+      <!-- Load the code that runs the drum machine -->
+    
 </body>
 </html>
